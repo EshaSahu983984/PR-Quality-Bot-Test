@@ -30,7 +30,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 .github/scripts/check_pr_description.py \
+          python3 scripts/check_pr_description.py \
             --owner "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
             --pr "${{ github.event.pull_request.number }}"
@@ -40,7 +40,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 .github/scripts/pr_file_change_sum_github.py \
+          python3 scripts/check_file_changes.py \
             --owner "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
             --pr "${{ github.event.pull_request.number }}" \
@@ -51,7 +51,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 .github/scripts/detect_forbidden_files_github.py \
+          python3 scripts/check_unwanted_files.py \
             --owner "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
             --pr "${{ github.event.pull_request.number }}"
