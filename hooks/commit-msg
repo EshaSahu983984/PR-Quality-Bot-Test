@@ -1,0 +1,38 @@
+#!/bin/bash
+# Commit message validation hook
+# Enforces Conventional Commit format and semantic clarity check via OpenAI
+
+MSG_FILE="$1"
+
+# Validate that the file exists
+if [ ! -f "$MSG_FILE" ]; then
+  echo "❌ Commit message file not found: $MSG_FILE"
+  exit 1
+fi
+
+# Read commit message
+MSG="$(cat "$MSG_FILE" | tr -d '\r')"
+
+# Basic Conventional Commit format check
+if [[ ! "$MSG" =~ ^(feat|fix|chore|refactor):[[:space:]]+.+$ ]]; then
+  echo "❌ Commit message must follow the pattern:"
+  echo "   feat|fix|chore|refactor: short description"
+  echo "💡 Example: feat: add pre-commit hook for branch validation"
+  exit 1
+fi
+
+# Run semantic clarity check via Python script
+if [ -f ".githooks/check_commit_semantics_openai.py" ]; then
+  python3 .githooks/check_commit_semantics_openai.py "$MSG_FILE"
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "❌ Commit blocked due to vague message."
+    echo "💡 Tip: Make the message more descriptive, e.g. 'feat: add semantic commit validation logic'"
+    exit $rc
+  fi
+else
+  echo "⚠️  Skipping semantic clarity check (Python script not found)."
+fi
+
+echo "✅ Commit message validated successfully!"
+exit 0

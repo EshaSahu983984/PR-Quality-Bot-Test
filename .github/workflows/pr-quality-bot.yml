@@ -1,0 +1,57 @@
+name: PR Quality Bot
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  pr-quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate PR title
+        id: title_check
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          if [[ ! $title =~ ^(feat|fix|chore|refactor):[[:space:]]+.+$ ]]; then
+            echo "::error file=PR::PR title invalid. Use 'feat: ...' or 'fix: ...' etc."
+            exit 1
+          fi
+
+      - name: Validate PR description
+        id: desc_check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/check_pr_description.py \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --pr "${{ github.event.pull_request.number }}"
+
+      - name: File change analysis (sum additions/deletions)
+        id: size_check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/pr_file_change_sum_github.py \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --pr "${{ github.event.pull_request.number }}" \
+            --threshold 300
+
+      - name: Detect forbidden files in PR
+        id: forbidden_check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/detect_forbidden_files_github.py \
+            --owner "${{ github.repository_owner }}" \
+            --repo "${{ github.event.repository.name }}" \
+            --pr "${{ github.event.pull_request.number }}"
