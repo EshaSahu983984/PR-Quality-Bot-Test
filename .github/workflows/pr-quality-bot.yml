@@ -30,7 +30,7 @@ jobs:
         run: |
           title="${{ github.event.pull_request.title }}"
           if [[ ! $title =~ ^(feat|fix|chore|refactor):[[:space:]]+.+$ ]]; then
-            echo "::error::PR title invalid. Must start with feat|fix|chore|refactor and a description."
+            echo "::error::PR title invalid. Must follow pattern feat|fix|chore|refactor: <meaningful description>. Example: 'feat:Add login endpoint'"
             exit 1
           fi
           echo "PR title OK"
