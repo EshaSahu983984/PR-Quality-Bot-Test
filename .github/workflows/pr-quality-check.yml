@@ -1,9 +1,0 @@
-name: PR Quality Bot
-
-on:
-  pull_request:
-    types: [opened, edited, synchronize, reopened]
-
-jobs:
-  pr-quality-checks:
-    uses: ./PR-Quality-Bot/.github/workflows/pr-quality-bot.yml
