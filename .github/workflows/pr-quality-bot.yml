@@ -30,7 +30,7 @@ jobs:
         run: |
           title="${{ github.event.pull_request.title }}"
           if [[ ! $title =~ ^(feat|fix|chore|refactor):[[:space:]]+.+$ ]]; then
-            echo "::error::PR title invalid. Must follow pattern feat|fix|chore|refactor: <meaningful description>. Example: 'feat:Add login endpoint'"
+            echo "::error::PR title invalid. Must follow pattern feat|fix|chore|refactor: <meaningful description>. Example: 'feat: Add login endpoint'"
             exit 1
           fi
           echo "PR title OK"
@@ -54,7 +54,7 @@ jobs:
             --owner "${{ github.repository_owner }}" \
             --repo "${{ github.event.repository.name }}" \
             --pr "${{ github.event.pull_request.number }}" \
-            --threshold "$(jq -r '.max_lines_changed' config/thresholds.json)"
+            --threshold "$(jq -r '.max_lines_changed' 'PR Quality Bot/config/thresholds.json')"
 
       - name: Detect forbidden files in PR
         id: forbidden_check
