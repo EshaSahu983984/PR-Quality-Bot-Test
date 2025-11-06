@@ -21,7 +21,7 @@ if [ -f ".githooks/check_commit_semantics_openai.py" ]; then
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "Commit blocked due to vague message."
-    echo "Use Copilot in VS Code to generate a better message if needed."
+    echo "Tip: Use GitHub Copilot’s 'Generate Commit Message' feature for better suggestions."
     exit $rc
   fi
 fi
