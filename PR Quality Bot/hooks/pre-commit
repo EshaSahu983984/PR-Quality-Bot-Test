@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
 # pre-commit: branch naming + optional local linters
 
-# safe branch read (works even before first commit)
 branch_name=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
 
 if [[ -z "$branch_name" || "$branch_name" == "HEAD" ]]; then
-  # first commit or no branch; skip branch name check
+  # first commit or no branch; skip
   exit 0
 fi
 
+# Block direct commits to main or master
+if [[ "$branch_name" == "main" || "$branch_name" == "master" ]]; then
+  echo "Direct commits to '$branch_name' branch are not allowed."
+  echo "Please create a feature/ or bugfix/ or hotfix/ branch instead and raise a PR ro main or master."
+  exit 1
+fi
+
+# Enforce naming pattern for all other branches
 pattern="^(feature|bugfix|hotfix)\/[a-zA-Z0-9._-]+$"
 if [[ ! $branch_name =~ $pattern ]]; then
   echo "Invalid branch name: $branch_name"
@@ -16,8 +23,5 @@ if [[ ! $branch_name =~ $pattern ]]; then
   exit 1
 fi
 
-# optional: run local linters (uncomment to enable)
-# if command -v ruff >/dev/null 2>&1; then ruff check . || exit 1; fi
-# if command -v black >/dev/null 2>&1; then black --check . || exit 1; fi
-
+echo "Branch name '$branch_name' is valid."
 exit 0
