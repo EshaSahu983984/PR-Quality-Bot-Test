@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# pre-commit: branch naming + optional local linters
+
+# safe branch read (works even before first commit)
+branch_name=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+if [[ -z "$branch_name" || "$branch_name" == "HEAD" ]]; then
+  # first commit or no branch; skip branch name check
+  exit 0
+fi
+
+pattern="^(feature|bugfix|hotfix)\/[a-zA-Z0-9._-]+$"
+if [[ ! $branch_name =~ $pattern ]]; then
+  echo "Invalid branch name: $branch_name"
+  echo "Use: feature/<ticket>-short-desc or bugfix/<ticket>-desc"
+  exit 1
+fi
+
+# optional: run local linters (uncomment to enable)
+# if command -v ruff >/dev/null 2>&1; then ruff check . || exit 1; fi
+# if command -v black >/dev/null 2>&1; then black --check . || exit 1; fi
+
+exit 0
