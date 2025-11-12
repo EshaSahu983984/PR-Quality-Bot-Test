@@ -7,7 +7,7 @@
 commit_msg_file=$1
 commit_msg=$(head -n1 "$commit_msg_file")
 
-# ✅ Conventional Commit regex pattern:
+# ✅Conventional Commit regex pattern:
 pattern='^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert)(\(.+\))?: .+'
 
 # ✅ Keywords that suggest the message was Copilot-generated
