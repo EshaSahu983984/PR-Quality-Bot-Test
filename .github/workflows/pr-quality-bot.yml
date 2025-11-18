@@ -29,11 +29,14 @@ jobs:
         id: title_check
         run: |
           title="${{ github.event.pull_request.title }}"
-          if [[ ! $title =~ ^(feat|fix|chore|refactor):[[:space:]]+.+$ ]]; then
-            echo "::error::PR title invalid. Must follow pattern feat|fix|chore|refactor: <meaningful description>. Example: 'feat: Add login endpoint'"
+          if [[ ! $title =~ ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_-]+\))?:[[:space:]]+.+$ ]]; then
+            echo "::error::PR title invalid. Must follow Conventional Commit format."
+            echo "::error::Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+            echo "::error::Format: <type>(optional-scope): <description>"
+            echo "::error::Example: 'feat(auth): add JWT token support'"
             exit 1
           fi
-          echo "PR title OK"
+          echo "✅ PR title OK"
 
       - name: Validate PR description (script)
         id: desc_check
