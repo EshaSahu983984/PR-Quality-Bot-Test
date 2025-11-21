@@ -1,0 +1,3 @@
+{
+  "commitMessageInstructions": "Generate a concise, clear, and conventional commit message using the format: <type>: <description>. Allowed types: feat, fix, chore, refactor."
+}

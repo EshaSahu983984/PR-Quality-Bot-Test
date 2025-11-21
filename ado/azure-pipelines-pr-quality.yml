@@ -1,0 +1,53 @@
+trigger: none
+
+pr: 
+  branches:
+    include:
+      - '*'
+
+variables:
+  - name: threshold
+    value: 300
+
+stages:
+- stage: PRQuality
+  jobs:
+  - job: RunChecks
+    displayName: PR Quality Checks
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - checkout: self
+        fetchDepth: 0
+
+      - bash: |
+          # Title check (ADO provides System.PullRequest.Title)
+          title="$(System.PullRequest.Title)"
+          if [[ ! "$title" =~ ^(feat|fix|chore|refactor):[[:space:]]+.+$ ]]; then
+            echo "##vso[task.logissue type=error]PR title invalid: $title"
+            exit 1
+          fi
+        displayName: 'Validate PR title'
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+      - bash: |
+          python3 ./ado/scripts/check_pr_description_ado.py \
+            --project $(System.TeamProject) \
+            --repo $(Build.Repository.Name) \
+            --pr $(System.PullRequest.PullRequestId)
+        env:
+          AZDO_TOKEN: $(System.AccessToken)
+        displayName: 'Validate PR description'
+
+      - bash: |
+          python3 ./ado/scripts/pr_file_change_sum_ado.py \
+            --org https://dev.azure.com/yourOrg \
+            --project $(System.TeamProject) \
+            --repo $(Build.Repository.ID) \
+            --pr $(System.PullRequest.PullRequestId) \
+            --threshold $(threshold)
+        env:
+          AZDO_TOKEN: $(System.AccessToken)
+        displayName: 'File change analysis'
