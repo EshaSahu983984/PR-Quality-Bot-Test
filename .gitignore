@@ -1,0 +1,5 @@
+secrets\.json
+credentials\.json
+config\.local\.json
+private\.key
+id_rsa
