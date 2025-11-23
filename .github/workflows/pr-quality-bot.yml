@@ -36,7 +36,8 @@ jobs:
             echo "::error::Example: 'feat(auth): add JWT token support'"
             exit 1
           fi
-          echo "PR title OK"
+          echo "PR title Validation Passed!"
+          echo "Your PR title follows the required guidelines. Good job!"
 
       - name: Validate PR description (script)
         id: desc_check
