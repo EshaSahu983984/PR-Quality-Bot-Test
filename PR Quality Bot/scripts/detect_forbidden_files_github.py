@@ -62,20 +62,24 @@ if violations:
 print("No forbidden files detected")
 
 # -------------------------------------------------------------------
-# Ensure .gitignore exists in root of repository
+# Ensure .gitignore exists in PR branch (NOT default branch)
 # -------------------------------------------------------------------
-gitignore_url = f"https://api.github.com/repos/{args.owner}/{args.repo}/contents/.gitignore"
+gitignore_url = (
+    f"https://api.github.com/repos/{args.owner}/{args.repo}/contents/.gitignore"
+    f"?ref=pull/{args.pr}/head"
+)
+
 response = requests.get(gitignore_url, headers=gh_headers())
 
 if response.status_code == 404:
-    print("::error::.gitignore file is missing. Please add a .gitignore to the repository.")
+    print("::error::.gitignore file is missing in the PR branch.")
     sys.exit(1)
 
 if response.status_code != 200:
     print("::error::Failed to verify .gitignore due to GitHub API error.")
     sys.exit(1)
 
-print(".gitignore file found.")
+print(".gitignore file found in PR branch.")
 
 # -------------------------------------------------------------------
 # Success message
