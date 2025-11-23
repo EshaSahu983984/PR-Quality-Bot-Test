@@ -39,7 +39,8 @@ steps:
         exit 1
       fi
 
-      echo "PR title OK"
+      echo "PR Title Validation Passed!"
+      echo "Your PR title follows Conventional Commit rules. Good job!"
     failOnStderr: false
     displayName: Validate PR Title
 

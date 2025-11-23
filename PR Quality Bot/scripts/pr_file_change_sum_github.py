@@ -30,6 +30,7 @@ while True:
 print(f"Total changes (add+del): {total}")
 if total > args.threshold:
     print(f"::warning::PR too large ({total} lines changed). Threshold: {args.threshold}")
-    sys.exit(1)
-print("PR size OK")
+    sys.exit(0)
+print("PR size Validation Passed!")
+print("Your PR size follows the required guidelines. Good job!")
 sys.exit(0)

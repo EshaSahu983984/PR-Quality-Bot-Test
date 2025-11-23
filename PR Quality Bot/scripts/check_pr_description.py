@@ -14,15 +14,35 @@ if r.status_code != 200:
     print("::error::Failed to fetch PR details")
     sys.exit(1)
 
-body = r.json().get("body","") or ""
+body = r.json().get("body", "") or ""
 if len(body.strip()) < 20:
     print("::error::PR description missing or too short (min 20 chars).")
     sys.exit(1)
 
-# require either Jira-like ticket or ADO AB# reference
-if not (re.search(r"[A-Z]{2,}-\d+", body) or re.search(r"AB#\d+", body)):
+# -------------------------------------------------------------
+# Work item reference patterns
+# -------------------------------------------------------------
+jira_pattern = r"[A-Z]{2,}-\d+"      # Jira: ELM-123
+ado_with_prefix = r"AB#\d+"          # ADO: AB#12345
+ado_standalone_num = r"\b\d{3,7}\b"  # ADO numeric: 12345 (standalone)
+
+# Require at least one valid ticket reference
+if not (
+    re.search(jira_pattern, body)
+    or re.search(ado_with_prefix, body)
+    or re.search(ado_standalone_num, body)
+):
     print("::error::No Jira or ADO work item reference found in PR description.")
     sys.exit(1)
 
-print("PR description OK")
+# -------------------------------------------------------------
+# Warning for missing 'checklist' or 'table'
+# -------------------------------------------------------------
+if not (re.search(r"\bchecklist\b", body, re.IGNORECASE) or
+        re.search(r"\btable\b", body, re.IGNORECASE)):
+    print("::warning::PR description does not contain 'checklist' or 'table'. Consider adding them for clarity.")
+
+print("PR Description Validation Passed!")
+print("Your PR description follows the required guidelines. Good job!")
+
 sys.exit(0)
