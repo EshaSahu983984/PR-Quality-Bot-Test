@@ -1,0 +1,73 @@
+# ---- Sensitive environment files ----
+\.env$
+\.env\.
+\.secret$
+\.secrets$
+secrets\.json
+credentials\.json
+config\.local\.json
+private\.key
+id_rsa
+id_rsa\.pub
+
+# ---- Dependency folders ----
+node_modules/
+vendor/
+
+# ---- IDE / Editor folders ----
+(^|/)\.vscode/
+(^|/)\.idea/
+(^|/)\.vs/
+(^|/)out/
+(^|/)dist/
+
+# ---- Python cache ----
+(^|/)(__pycache__)/
+\.pyc$
+
+# ---- Logs ----
+\.log$
+logs/
+debug\.log
+
+# ---- Binary executable files ----
+\.exe$
+\.dll$
+\.so$
+\.dylib$
+
+# ---- Build artifacts ----
+\.zip$
+\.tar$
+\.tgz$
+\.gz$
+\.7z$
+\.jar$
+\.war$
+\.class$
+
+# ---- Temporary files ----
+\.tmp$
+\.temp$
+\.swp$
+\.bak$
+\.old$
+
+# ---- OS generated files ----
+(^|/)Thumbs\.db$
+(^|/)Desktop\.ini$
+\.DS_Store$
+
+# ---- Database files ----
+\.sqlite$
+\.db$
+\.sql$
+
+# ---- Docker unwanted files ----
+docker-compose\.override\.yml
+
+# ---- Misc unwanted ----
+package-lock\.json
+yarn\.lock
+Pipfile\.lock
+poetry\.lock

@@ -1,0 +1,77 @@
+trigger: none
+
+pr:
+  branches:
+    include:
+      - "*"
+
+pool:
+  vmImage: "ubuntu-latest"
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.12"
+      addToPath: true
+
+  - script: |
+      pip install -r "PR Quality Bot/requirements.txt"
+    displayName: Install Python Dependencies
+
+  - script: |
+      echo "PR Title Validation"
+
+      # Correct variable expansion for Azure DevOps
+      TITLE="$SYSTEM_PULLREQUEST_TITLE"
+
+      echo "PR Title: $TITLE"
+
+      # Conventional Commit regex
+      REGEX='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_-]+\))?:\s+.+$'
+
+      if [[ ! "$TITLE" =~ $REGEX ]]; then
+        echo "##vso[task.logissue type=error]PR title invalid. Must follow Conventional Commit format."
+        echo "##vso[task.logissue type=error]Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+        echo "##vso[task.logissue type=error]Example: feat(auth): add JWT token support"
+        exit 1
+      fi
+
+      echo "PR Title Validation Passed!"
+      echo "Your PR title follows Conventional Commit rules. Good job!"
+    failOnStderr: false
+    displayName: Validate PR Title
+
+
+  - script: |
+      echo "PR Description Validation"
+
+      python3 "PR Quality Bot/scripts/check_pr_description_ado.py" \
+        --org "$(System.CollectionUri)" \
+        --project "$(System.TeamProject)" \
+        --repo "$(Build.Repository.Name)" \
+        --pr "$(System.PullRequest.PullRequestId)"
+    displayName: Validate PR Description
+
+  - script: |
+      echo "Checking File Additions / Deletions"
+
+      python3 "PR Quality Bot/scripts/pr_file_change_sum_ado.py" \
+        --org "$(System.CollectionUri)" \
+        --project "$(System.TeamProject)" \
+        --repo "$(Build.Repository.Name)" \
+        --pr "$(System.PullRequest.PullRequestId)" \
+        --threshold $(jq -r '.max_lines_changed' 'PR Quality Bot/config/thresholds.json')
+    displayName: File Change Analysis
+
+  - script: |
+      echo "Detecting Forbidden Files"
+
+      python3 "PR Quality Bot/scripts/detect_forbidden_files_ado.py" \
+        --org "$(System.CollectionUri)" \
+        --project "$(System.TeamProject)" \
+        --repo "$(Build.Repository.Name)" \
+        --pr "$(System.PullRequest.PullRequestId)"
+    displayName: Forbidden File Detection

@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# pre-commit: branch naming + optional local linters
+
+CONFIG_FILE="PR Quality Bot/config/branch_prefixes.txt"
+
+branch_name=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+if [[ -z "$branch_name" || "$branch_name" == "HEAD" ]]; then
+  # first commit or detached HEAD — allow
+  exit 0
+fi
+
+# ------------------------------------------------------------
+# 1. Load branch prefixes from config file
+# ------------------------------------------------------------
+if [[ -f "$CONFIG_FILE" ]]; then
+  mapfile -t PREFIXES < "$CONFIG_FILE"
+else
+  # Default fallback prefixes
+  PREFIXES=("feature" "bugfix" "hotfix")
+fi
+
+# Join prefixes into regex group feature|bugfix|hotfix|...
+prefix_group=$(printf "|%s" "${PREFIXES[@]}")
+prefix_group="${prefix_group:1}"   # remove leading "|"
+
+# ------------------------------------------------------------
+# 2. Block direct commits to protected branches
+# ------------------------------------------------------------
+if [[ "$branch_name" == "main" || "$branch_name" == "master" ]]; then
+  echo "Direct commits to '$branch_name' are not allowed."
+  echo "Please create a branch using one of the prefixes: ${PREFIXES[*]}"
+  exit 1
+fi
+
+# ------------------------------------------------------------
+# 3. Validate branch naming pattern
+# ------------------------------------------------------------
+pattern="^(${prefix_group})\/[a-zA-Z0-9._-]+$"
+
+if [[ ! $branch_name =~ $pattern ]]; then
+  echo "Invalid branch name: $branch_name"
+  echo "Allowed prefixes: ${PREFIXES[*]}"
+  echo "Example: feature/ELM-123-description"
+  exit 1
+fi
+
+# ------------------------------------------------------------
+# Passed
+# ------------------------------------------------------------
+echo "✔ Branch '$branch_name' is valid."
+exit 0

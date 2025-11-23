@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#
+# commit-msg hook — warn if commit message is manually written instead of Copilot
+
+#read the commit message
+commit_msg_file="$1"
+commit_msg=$(head -n1 "$commit_msg_file")
+
+# Allow VS Code commits (likely Copilot generated)
+if [ -n "$GIT_EDITOR" ] && [[ "$GIT_EDITOR" == *"code"* ]]; then
+  echo "Copilot or VS Code commit detected — allowed."
+  exit 0
+fi
+
+# Detect manual commit using -m
+last_commit_msg=$(git log -1 --pretty=%B 2>/dev/null)
+
+if echo "$last_commit_msg" | grep -q "$commit_msg"; then
+  echo "-----------------------------------------------------------"
+  echo "WARNING: Manual commit message detected!"
+  echo "ℹRecommendation: Use GitHub Copilot's"
+  echo "'Generate Commit Message' from VS Code Source Control."
+  echo "-----------------------------------------------------------"
+  # DO NOT FAIL — allow commit
+  exit 0
+fi
+
+exit 0
