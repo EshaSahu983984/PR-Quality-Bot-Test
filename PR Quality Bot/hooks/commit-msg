@@ -12,16 +12,16 @@ commit_msg=$(head -n1 "$commit_msg_file")
 # Check if commit message file is present but commit came via `-m`
 if [ -n "$GIT_EDITOR" ] && [[ "$GIT_EDITOR" == *"code"* ]]; then
   # Allow VS Code Copilot-generated commits (they invoke VS Code editor)
-  echo "✅ Copilot or VS Code commit detected — allowed."
+  echo "Copilot or VS Code commit detected — allowed."
   exit 0
 fi
 
 # If commit message came directly from -m flag (manual commit)
 if git log -1 --pretty=%B | grep -q "$commit_msg"; then
-  echo "❌ Manual commit message detected!"
-  echo "🚫 Please use GitHub Copilot's 'Generate Commit Message' feature in VS Code."
+  echo "Manual commit message detected!"
+  echo "Please use GitHub Copilot's 'Generate Commit Message' feature in VS Code."
   echo ""
-  echo "🧠 Tip: In VS Code, open Source Control → click '...' → 'Generate Commit Message with Copilot'."
+  echo "Tip: In VS Code, open Source Control → click '...' → 'Generate Commit Message with Copilot'."
   exit 1
 fi
 

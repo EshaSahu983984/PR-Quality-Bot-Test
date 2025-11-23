@@ -24,11 +24,15 @@ steps:
   - script: |
       echo "PR Title Validation"
 
-      TITLE="$(System.PullRequest.Title)"
+      # Correct variable expansion for Azure DevOps
+      TITLE="$SYSTEM_PULLREQUEST_TITLE"
 
       echo "PR Title: $TITLE"
 
-      if [[ ! "$TITLE" =~ ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_-]+\))?:[[:space:]]+.+$ ]]; then
+      # Conventional Commit regex
+      REGEX='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_-]+\))?:\s+.+$'
+
+      if [[ ! "$TITLE" =~ $REGEX ]]; then
         echo "##vso[task.logissue type=error]PR title invalid. Must follow Conventional Commit format."
         echo "##vso[task.logissue type=error]Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
         echo "##vso[task.logissue type=error]Example: feat(auth): add JWT token support"
@@ -38,6 +42,7 @@ steps:
       echo "PR title OK"
     failOnStderr: false
     displayName: Validate PR Title
+
 
   - script: |
       echo "PR Description Validation"

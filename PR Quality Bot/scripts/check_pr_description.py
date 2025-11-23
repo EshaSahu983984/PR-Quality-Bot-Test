@@ -24,5 +24,5 @@ if not (re.search(r"[A-Z]{2,}-\d+", body) or re.search(r"AB#\d+", body)):
     print("::error::No Jira or ADO work item reference found in PR description.")
     sys.exit(1)
 
-print("✅ PR description OK")
+print("PR description OK")
 sys.exit(0)

@@ -30,5 +30,5 @@ if violations:
     for v in violations:
         print(" -", v)
     sys.exit(1)
-print("✅ No forbidden files detected")
+print("No forbidden files detected")
 sys.exit(0)
