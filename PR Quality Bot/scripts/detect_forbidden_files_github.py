@@ -62,27 +62,58 @@ if violations:
 print("No forbidden files detected")
 
 # -------------------------------------------------------------------
-# Ensure .gitignore exists in PR branch (NOT default branch)
+# Check .gitignore existence rule
+#
+# Rule:
+# ✔ If .gitignore exists in target branch → PR does NOT need it
+# ✔ If .gitignore missing in target branch → PR MUST include it
 # -------------------------------------------------------------------
-gitignore_url = (
-    f"https://api.github.com/repos/{args.owner}/{args.repo}/contents/.gitignore"
-    f"?ref=pull/{args.pr}/head"
+
+# PR branch /head ref
+pr_head_ref = f"pull/{args.pr}/head"
+
+# Get base branch name
+pr_details_url = f"https://api.github.com/repos/{args.owner}/{args.repo}/pulls/{args.pr}"
+pr_details_resp = requests.get(pr_details_url, headers=gh_headers())
+
+if pr_details_resp.status_code != 200:
+    print("::error::Failed to fetch PR details to determine base branch.")
+    sys.exit(1)
+
+base_branch = pr_details_resp.json().get("base", {}).get("ref")
+
+if not base_branch:
+    print("::error::Unable to determine PR target branch.")
+    sys.exit(1)
+
+# Check .gitignore in target branch
+target_gitignore_url = (
+    f"https://api.github.com/repos/{args.owner}/{args.repo}/contents/.gitignore?ref={base_branch}"
 )
+target_resp = requests.get(target_gitignore_url, headers=gh_headers())
+target_exists = (target_resp.status_code == 200)
 
-response = requests.get(gitignore_url, headers=gh_headers())
+# Check .gitignore in PR branch
+pr_gitignore_url = (
+    f"https://api.github.com/repos/{args.owner}/{args.repo}/contents/.gitignore?ref={pr_head_ref}"
+)
+pr_resp = requests.get(pr_gitignore_url, headers=gh_headers())
+pr_exists = (pr_resp.status_code == 200)
 
-if response.status_code == 404:
-    print("::error::.gitignore file is missing in the PR branch.")
-    sys.exit(1)
+# ---------------------- Decision Logic ----------------------
+if target_exists:
+    print("✔ .gitignore exists in target branch → PR not required to contain it.")
+else:
+    # target missing
+    if not pr_exists:
+        print("::error::.gitignore does NOT exist in target branch and is also missing in PR.")
+        print("PR MUST include a .gitignore file.")
+        sys.exit(1)
 
-if response.status_code != 200:
-    print("::error::Failed to verify .gitignore due to GitHub API error.")
-    sys.exit(1)
-
-print(".gitignore file found in PR branch.")
+    print("✔ Target branch missing .gitignore, but PR includes it → OK.")
 
 # -------------------------------------------------------------------
 # Success message
 # -------------------------------------------------------------------
-print("✔ PR Forbidden Files Validation Passed!")
+print("✔ PR Forbidden Files + .gitignore Validation Passed!")
 sys.exit(0)
